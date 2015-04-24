@@ -21,6 +21,7 @@ target_link_libraries ( Projekt
 	VectorUtils3
 	LoadObject
 	LoadTGA
+	m
 )
 
 add_custom_command(TARGET Projekt POST_BUILD
