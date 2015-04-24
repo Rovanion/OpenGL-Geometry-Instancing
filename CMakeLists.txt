@@ -5,7 +5,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -lcur
 
 find_package(OpenGL)
 find_package(GLUT)
-find_package(GLEW)
 
 add_subdirectory (libraries)
 

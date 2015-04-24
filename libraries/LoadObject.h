@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <GL/glew.h>
+#include <GL/gl.h>
 
 
 typedef struct

@@ -4,7 +4,7 @@
 #include <atomic>
 #include <string>
 
-#include <GL/glew.h>
+#include <GL/gl.h>
 
 #include "libraries/VectorUtils3.h"
 #include "libraries/LoadObject.h"

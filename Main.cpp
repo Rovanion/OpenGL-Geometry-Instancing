@@ -1,9 +1,10 @@
-#include <iostream>
-
 #include <thread>
 #include <chrono>
+#include <iostream>
 
-#include <GL/glew.h>
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glext.h>
 #include <GL/freeglut.h>
 
 #include "Main.hpp"
@@ -36,7 +37,7 @@ GLuint Main::darkBlue    = 0;
 GLuint Main::signTexture = 0;
 mat4   Main::transHand   = T(0, 0, 0);
 mat4   Main::transSign   = Mult(T(0, 20, 0), Rx(-M_PI_2));
-mat4   Main::transPlane  = Mult(Mult(T(0, 20, 1), Rx(-M_PI_2)), S(1.5, 1.5, 1.5));
+mat4   Main::transPlane  = Mult(Mult(T(0, 20, 1), Rx(-M_PI_2/2)), S(1.5, 1.5, 1.5));
 std::atomic<bool> Main::signShowing = {false};
 std::atomic<bool> Main::loadNewSign = {false};
 std::atomic<bool> Main::menuOpen = {false};
@@ -62,13 +63,6 @@ int Main::init(int argc, char** argv){
 	glutCreateWindow("Leap Music!");
 	printError("Main::init()");
 
-	glewExperimental = GL_TRUE;
-	GLenum glew_status = glewInit();
-	printError("Main::init() in call to glewInit()");
-	if (glew_status != GLEW_OK) {
-		std::cout << glewGetErrorString(glew_status) << std::endl;
-	}
-
 	dumpInfo();
 
 	if (initResources()) {
@@ -80,6 +74,7 @@ int Main::init(int argc, char** argv){
 
 	// Upon exiting the main loop;
 	freeResources();
+	return 0;
 }
 
 
