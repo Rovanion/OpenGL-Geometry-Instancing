@@ -9,7 +9,7 @@ find_package(GLUT)
 add_subdirectory (libraries)
 
 add_executable ( Projekt
-	Main.cpp
+	main.c
 	shaders/main.vert
 	shaders/main.frag
 )

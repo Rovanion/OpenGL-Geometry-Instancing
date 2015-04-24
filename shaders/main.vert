@@ -1,7 +1,7 @@
 #version 150
 
-in vec3 vertNormal;
 in vec3 vertPosition;
+in vec3 vertNormal;
 in vec2 vertTexCoord;
 uniform mat4 transform;
 uniform mat4 viewFrustum;
