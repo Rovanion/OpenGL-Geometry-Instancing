@@ -15,10 +15,10 @@
 
 #include <math.h>
 
-#include "libraries/GLUtilities.h"
-#include "libraries/LoadObject.h"
-#include "libraries/LoadTGA.h"
-#include "libraries/VectorUtils3.h"
+#include "./libraries/GLUtilities.h"
+#include "./libraries/LoadObject.h"
+#include "./libraries/LoadTGA.h"
+#include "./libraries/VectorUtils3.h"
 
 #include "main.h"
 
@@ -103,7 +103,7 @@ void init(void)
 
 	// Load and compile shader
 	skyboxProgram = loadShaders("./shaders/skybox.vert", "./shaders/skybox.frag");
-	program = loadShaders("./shaders/main.vert", "./shaders/main.frag");
+	program = loadShaders("./shaders/world.vert", "./shaders/world.frag");
 
 	GLfloat projectionMatrix[] = {2.0f*near/(right-left), 0.0f,
                                 (right+left)/(right-left), 0.0f,
@@ -161,6 +161,7 @@ void display(void)
 {
 	printError("pre display");
 	cameraPos = moveOnKeyInputRelativeCamera(cameraPos);
+	cameraTarget = moveOnKeyInputRelativeCamera(cameraTarget);
 	lookMatrix = lookAtv(cameraPos, cameraTarget, cameraNormal);
 
 	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME) / 5000;
@@ -173,7 +174,7 @@ void display(void)
 	glDisable(GL_DEPTH_TEST);
 
 	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "transform"), 1, GL_TRUE, T(cameraPos.x, cameraPos.y, cameraPos.z).m);
-	DrawModel(skybox, skyboxProgram, "vertPosition", NULL, "vertTexCoord");
+	DrawModel(skybox, skyboxProgram, "in_Position", NULL, "in_TexCoord");
 
 	glEnable(GL_DEPTH_TEST);
 	glUseProgram(program);
@@ -203,7 +204,7 @@ void display(void)
 void drawObject(mat4 transform, Model* model, GLuint p)
 {
 	glUniformMatrix4fv(glGetUniformLocation(p, "transform"), 1, GL_TRUE, transform.m);
-	DrawModel(model, p, "vertPosition", "vertNormal", "vertTexCoord");
+	DrawModel(model, p, "in_Position", "in_Normal", "in_TexCoord");
 	printError("drawObject()");
 }
 
@@ -222,24 +223,23 @@ int main(int argc, char *argv[])
 
 void handleMouse(int x, int y)
 {
-  cameraTarget = (vec3) {cos((float)x / 400 * M_PI * 2) * 20,
-												 cos((float)y / 400 * M_PI * 2) * 20,
-												 sin((float)x / 400 * M_PI * 2) * 20};
+  cameraTarget = (vec3)
+		{cos((float)x / 400 * M_PI * 2) * sin((float)y / 300 * M_PI),
+		 -(float)y / 300 + 0.5,
+		 sin((float)x / 400 * M_PI * 2) * sin((float)y / 300 * M_PI)};
 	cameraTarget = VectorAdd(cameraTarget, cameraPos);
 
-  lookMatrix = lookAtv(cameraPos, cameraTarget, cameraNormal);
+	lookMatrix = lookAtv(cameraPos, cameraTarget, cameraNormal);
 	cameraDirection = Normalize(VectorSub(cameraTarget, cameraPos));
 	printError("handleMouse()");
 }
-
-
 
 vec3 moveOnKeyInputRelativeCamera(vec3 in)
 {
 	vec3 forward;
 	vec3 leftV;
-	forward = ScalarMult(cameraDirection, 0.5f);
-	leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 0.5f);
+	forward = ScalarMult(cameraDirection, 0.1f);
+	leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 0.1f);
 
   if(keyIsDown('w')) {
     in.x += forward.x;
@@ -263,11 +263,15 @@ vec3 moveOnKeyInputRelativeCamera(vec3 in)
     in.z += leftV.z;
 	}
 
+  if(keyIsDown('p')){
+    printf("(e%f, ", cameraPos.x);
+    printf("%f, ", cameraPos.y);
+    printf("%f)\n", cameraPos.z);
+	}
   if(keyIsDown('q'))
-    in.z += 0.1;
+    in.y += 0.1;
   else if(keyIsDown('e'))
-    in.z -= 0.1;
-
+    in.y -= 0.1;
 
 	printError("moveonkeyinputrelativecamera()");
   return in;
