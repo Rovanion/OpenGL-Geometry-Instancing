@@ -19,7 +19,6 @@ add_executable ( Projekt
 target_link_libraries ( Projekt
 	${OPENGL_LIBRARIES}
 	${GLUT_LIBRARIES}
-	${GLEW_LIBRARIES}
 	GLUtilities
 	VectorUtils3
 	LoadObject
