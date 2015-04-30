@@ -11,8 +11,10 @@ add_subdirectory (libraries)
 
 add_executable ( Projekt
 	main.c
-	shaders/main.vert
-	shaders/main.frag
+	shaders/world.vert
+	shaders/world.frag
+	shaders/skybox.vert
+	shaders/skybox.frag
 )
 target_link_libraries ( Projekt
 	${OPENGL_LIBRARIES}
