@@ -1,19 +1,5 @@
-// Lab 1-1.
-// This is the same as the first simple example in the course book,
-// but with a few error checks.
-// Remember to copy your file to a new on appropriate places during the lab so you keep old results.
-// Note that the files "lab1-1.frag", "lab1-1.vert" are required.
-
-// Should work as is on Linux and Mac. MS Windows needs GLEW or glee.
-// See separate Visual Studio version of my demos.
-#ifdef __APPLE__
-	#include <OpenGL/gl3.h>
-	#include "MicroGlut.h"
-	// Linking hint for Lightweight IDE
-	// uses framework Cocoa
-#endif
-
 #include <math.h>
+#include <GL/gl.h>
 
 #include "./libraries/GLUtilities.h"
 #include "./libraries/LoadObject.h"
@@ -21,6 +7,7 @@
 #include "./libraries/VectorUtils3.h"
 
 #include "main.h"
+#include "instancing.h"
 
 #define near 1.0
 #define far 300.0
@@ -33,6 +20,7 @@
 unsigned int vertexArrayObjID;
 GLuint program;
 GLuint skyboxProgram;
+GLuint instancingProgram;
 
 Model *walls;
 Model *roof;
@@ -104,6 +92,7 @@ void init(void)
 	// Load and compile shader
 	skyboxProgram = loadShaders("./shaders/skybox.vert", "./shaders/skybox.frag");
 	program = loadShaders("./shaders/world.vert", "./shaders/world.frag");
+	instancingProgram = loadShaders("./shaders/instancing.vert", "./shaders/instancing.frag");
 
 	GLfloat projectionMatrix[] = {2.0f*near/(right-left), 0.0f,
                                 (right+left)/(right-left), 0.0f,
@@ -140,20 +129,23 @@ void init(void)
 							 4, specularExponent);
 	glUniform1iv(glGetUniformLocation(program, "isDirectional"),
 							 4, isDirectional);
-	glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
+	glUniform1i(glGetUniformLocation(program, "texUnit"), 0);
 
 	glUseProgram(skyboxProgram);
 	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(glGetUniformLocation(skyboxProgram, "texUnit"), 0); // Texture unit 0
+	glUniform1i(glGetUniformLocation(skyboxProgram, "texUnit"), 0);
 	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+
+	glUseProgram(instancingProgram);
+	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 
 	printError("init(): End");
 }
 
 void OnTimer(int value)
 {
-    glutPostRedisplay();
-    glutTimerFunc(20, &OnTimer, value);
+	glutPostRedisplay();
+	glutTimerFunc(20, &OnTimer, value);
 	printError("OnTimer()");
 }
 
@@ -197,6 +189,10 @@ void display(void)
 	drawObject(transGround,ground, program);
 	drawObject(transTeapot,teapot, program);
 	drawObject(transBunny,bunny, program);
+
+	glUseProgram(instancingProgram);
+	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "viewMatrix"), 1, GL_TRUE, lookMatrix.m);
+	drawInstances(instancingProgram, 100, t, bunny);
 
 	glutSwapBuffers();
 }
