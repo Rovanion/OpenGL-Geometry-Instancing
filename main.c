@@ -28,6 +28,7 @@ Model *blade;
 Model *balcony;
 Model *ground;
 Model *bunny;
+Model *octagon;
 Model *teapot;
 Model *skybox;
 mat4 transWalls;
@@ -54,7 +55,7 @@ vec3 bladePos;
 void init(void)
 {
   bladePos = (vec3){0, 9, 4.5};
-  cameraPos = (vec3){10.5f, 13.6f, 23.0f};
+  cameraPos = (vec3){1.5f, 1.6f, 2.0f};
   cameraTarget = (vec3){-10.0f, -10.0f, -10.0f};
   cameraNormal = (vec3){0.0f, 1.0f, 0.0f};
   lookMatrix = lookAtv(cameraPos, cameraTarget, cameraNormal);
@@ -67,6 +68,7 @@ void init(void)
 	balcony = LoadModelPlus("./models/windmill/windmill-balcony.obj");
 	ground = LoadModelPlus("./models/ground.obj");
 	bunny = LoadModelPlus("./models/bunnyplus.obj");
+	octagon = LoadModelPlus("./models/octagon.obj");
 	teapot = LoadModelPlus("./models/teapot.obj");
 	skybox = LoadModelPlus("./models/skybox.obj");
 	transWalls = T(0, 0, 0);
@@ -138,6 +140,7 @@ void init(void)
 
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	setupInstancedVertexAttributes(instancingProgram, bunny);
 
 	printError("init(): End");
 }
@@ -192,8 +195,7 @@ void display(void)
 
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "viewMatrix"), 1, GL_TRUE, lookMatrix.m);
-	drawInstances(instancingProgram, 100, t, bunny);
-
+	drawInstances(instancingProgram, 1, t, roof);
 	glutSwapBuffers();
 }
 

@@ -9,6 +9,7 @@
 #include "main.h"
 
 GLuint model_matrix_buffer;
+GLuint color_buffer;
 
 void setupInstancedVertexAttributes(GLuint prog, Model* m){
 	glBindVertexArray(m->vao);	// Select VAO
@@ -26,17 +27,17 @@ void setupInstancedVertexAttributes(GLuint prog, Model* m){
 	// Configure the regular vertex attribute arrays -
 	// position and normal.
 	glBindBuffer(GL_ARRAY_BUFFER, m->vb);
-	glVertexAttribPointer(position_loc, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(position_loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(position_loc);
 	glBindBuffer(GL_ARRAY_BUFFER, m->nb);
-	glVertexAttribPointer(normal_loc, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(normal_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(normal_loc);
 
 	// Now we set up the color array. We want each instance of our
 	// geometry to assume a different color, so we'll just pack colors
 	// into a buffer object and make an instanced vertex attribute out
 	// of it.
-	glBindBuffer(GL_ARRAY_BUFFER, m->tb);
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glVertexAttribPointer(color_loc, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(color_loc);
 	// This is the important bit... set the divisor for the color array
@@ -73,9 +74,9 @@ void drawInstances(GLuint program, GLuint count, GLfloat time, Model* m) {
 	// Set model matrices for each instance
 	for (GLuint n = 0; n < count; n++)
 		{
-			float a = 50.0f * (float)n / 4.0f;
-			float b = 50.0f * (float)n / 5.0f;
-			float c = 50.0f * (float)n / 6.0f;
+			float a = 0.2f + (float)n;
+			float b = 0.5f + (float)n;
+			float c = 1.0f + (float)n;
 
 			matrices[n] = T(a, b, c);
 		}
@@ -87,5 +88,5 @@ void drawInstances(GLuint program, GLuint count, GLfloat time, Model* m) {
 	glUseProgram(program);
 
 	// Render INSTANCE_COUNT objects
-	glDrawArraysInstanced(GL_TRIANGLES, 0, m->numIndices, count);
+	glDrawElementsInstanced(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L, count);
 }

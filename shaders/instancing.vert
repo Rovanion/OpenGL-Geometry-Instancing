@@ -31,9 +31,9 @@ void main(void)
 	// and the per-instance model matrix.
 	mat4 model_view_matrix = viewMatrix * model_matrix;
 
-	// Transform position by the model-view matrix, then by thead    // projection matrix.
-	gl_Position = projectionMatrix * (model_view_matrix *
-																		 position);
+	// Transform position by the model-view matrix, then by thead
+	// projection matrix.
+	gl_Position = projectionMatrix * viewMatrix * position;
 	// Transform the normal by the upper-left-3x3-submatrix of thead    // model-view matrix
 	vertex.normal = mat3(model_view_matrix) * normal;
 	// Pass the per-instance color through to the fragment shader.
