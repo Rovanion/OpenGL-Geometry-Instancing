@@ -2,11 +2,11 @@
 #extension GL_ARB_explicit_attrib_location : enable
 
 // "position" and "normal" are regular vertex attributes
-layout (location = 0) in vec4 position;
+in vec4 position;
 layout (location = 1) in vec3 normal;
 
 // Color is a per-instance attribute
-layout (location = 2) in vec4 color;
+layout (location = 2) in vec2 textureCoordinate;
 
 // model_matrix will be used as a per-instance transformation
 // matrix. Note that a mat4 consumes 4 consecutive locations, so
@@ -21,10 +21,9 @@ uniform mat4 projectionMatrix;
 out VERTEX
 {
 	vec3    normal;
-	vec4    color;
+	vec2    textureCoordinate;
 } vertex;
 
-// Ok, go!
 void main(void)
 {
 	// Construct a model-view matrix from the uniform view matrix
@@ -37,5 +36,5 @@ void main(void)
 	// Transform the normal by the upper-left-3x3-submatrix of thead    // model-view matrix
 	vertex.normal = mat3(model_view_matrix) * normal;
 	// Pass the per-instance color through to the fragment shader.
-	vertex.color = color;
+	vertex.textureCoordinate = textureCoordinate;
 }

@@ -141,7 +141,6 @@ void init(void)
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	setupInstancedVertexAttributes(instancingProgram, bunny);
-
 	printError("init(): End");
 }
 
@@ -190,12 +189,12 @@ void display(void)
 
 	glBindTexture(GL_TEXTURE_2D, grass);
 	drawObject(transGround,ground, program);
-	drawObject(transTeapot,teapot, program);
-	drawObject(transBunny,bunny, program);
+	drawObject(transTeapot,balcony, program);
+
 
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "viewMatrix"), 1, GL_TRUE, lookMatrix.m);
-	drawInstances(instancingProgram, 1, t, roof);
+	drawInstances(instancingProgram, 10, t, blade);
 	glutSwapBuffers();
 }
 
