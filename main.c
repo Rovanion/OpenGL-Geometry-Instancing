@@ -183,12 +183,12 @@ void display(void)
 	}
 
 	glBindTexture(GL_TEXTURE_2D, concrete);
-	drawObject(transWalls, walls, program);
+	//drawObject(transWalls, walls, program);
 	drawObject(transRoof, roof, program);
 	drawObject(transBalcony, balcony, program);
 
 	glBindTexture(GL_TEXTURE_2D, grass);
-	drawObject(transGround,ground, program);
+	//drawObject(transGround,ground, program);
 	drawObject(transTeapot,balcony, program);
 
 

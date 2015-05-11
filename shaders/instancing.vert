@@ -2,7 +2,7 @@
 #extension GL_ARB_explicit_attrib_location : enable
 
 // "position" and "normal" are regular vertex attributes
-in vec4 position;
+layout (location = 0) in vec4 position;
 layout (location = 1) in vec3 normal;
 
 // Color is a per-instance attribute

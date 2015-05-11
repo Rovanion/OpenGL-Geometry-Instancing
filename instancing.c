@@ -49,9 +49,10 @@ void drawModelInstanced(Model *m, GLuint program, char* vertexVariableName, char
 
 	vec4 test_data = (vec4) { 1.0, 1.0, 1.0, 1.0 };
 	glBindBuffer(GL_ARRAY_BUFFER, test_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(test_data),  &test_data, GL_STATIC_DRAW);
 	glVertexAttribPointer(test_loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(test_loc);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(test_data),  &test_data, GL_STATIC_DRAW);
+
 
 	if (m != NULL){
 		glBindVertexArray(m->vao);	// Select VAO
