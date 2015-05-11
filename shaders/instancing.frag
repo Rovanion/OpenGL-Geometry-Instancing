@@ -1,17 +1,15 @@
 #version 150
 
-in VERTEX
-{
-	vec3 normal;
-	vec2 textureCoordinates;
-	vec4 test;
-} vertex;
+
+in vec3 vertNormal;
+in vec2 vertTextureCoordinates;
+in vec4 vertTest;
 
 out vec4 outColor;
 
 void main(void){
 	outColor = vec4(1, 1, 0, 0);
-	if(vertex.normal.y < 0.6){
-		outColor = vertex.test;
+	if(vertNormal.y < 0.6){
+		outColor = vertTest;
 	}
 }

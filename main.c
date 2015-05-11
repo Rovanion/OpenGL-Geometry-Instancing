@@ -194,7 +194,7 @@ void display(void)
 
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "viewMatrix"), 1, GL_TRUE, lookMatrix.m);
-	drawModelInstanced(octagon, instancingProgram, "position", "normal", "textureCoordinates", 10);
+	drawModelInstanced(octagon, instancingProgram, 10, t);
 	glutSwapBuffers();
 }
 
