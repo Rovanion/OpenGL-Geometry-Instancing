@@ -1,0 +1,125 @@
+% -*- compile-command: "pdflatex report.tex"; -*-
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{listings}
+\lstset{
+language=C,
+basicstyle=\footnotesize
+}
+\begin{document}
+
+
+\section{Introduction}
+
+Our mission was to produce a demonstration of visually pleasing scenes containing thousands of objects at the same time constructed using OpenGL. This without severely taxing the graphics processor (GPU).
+
+The following goals were set up as requirements for project success:
+
+\begin{itemize}
+\item Handle translation, rotation and texturing of thousands of objects using geometry instancing.
+\item Simplification of the scene through frustum and backface culling.
+\end{itemize}
+
+In addition there were stretch goals set up:
+\begin{itemize}
+\item Procedurally generated terrain through random midpoint displacement.
+\item Procedurally generated objects through recursive geometry generation.
+\item Procedurally generated worlds thruogh fractals.
+\item Bump mapping.
+\item Simplification of the scene through level of detail.
+\item Buffering multiple models in the same vertex attribute object (VAO).
+\end{itemize}
+
+As you can see, most of the goals were not necessary in order to reach project completion.
+
+\section{Background}
+
+Geometry instancing is the act of drawing multiple instances of the same geometry using only one draw call. Examples of draw calls are:
+
+\begin{lstlisting}
+glDrawElements(GL_TRIANGLES, nrIndicies, GL_UNSIGNED_INT, 0L);
+glDrawElementsInstanced(GL_TRIANGLES, nrIndicies,
+    GL_UNSIGNED_INT, 0L, nrOfInstances);
+\end{lstlisting}
+\noindent
+The first one of these is one draw call which you've probably already used in your own code. It draws the currently bound VAO using the associated attribute buffers and uniforms. The second one on the other hand draws multiple instances of the same geometry.
+
+But in order to distinguish between the different instances of the geometry one must provide data to the shaders which can be changed between the instances. Such data is most commonly translation matrixes and other minor variations to perhaps coloring.
+
+Continuing on in this report the example used will be translation matrixes as it's the first thing one has to differentiate between the instances in order to see that they are separate objects. If two instances are drawn at the very same coordinates you might as well just draw one.
+
+There are multiple ways of storing these transformation matrixes for transfer and use in GPU. Among other methods you can choose store them in texture units, uniforms or in indexed arrays provided that the graphics driver implements the requiered OpenGL specification. Associated with these are various performance characteristics which vary depending on the specific card. The implementations are also varying how easy they are to comprehend at the code level.
+
+
+\section{Implementation}
+
+We decided on implementing geometry instancing using instanced arrays and the OpenGL glDraw*Instaced calls which require either OpenGL version 3.3 or an earlier version which implements the GL\_ARB\_draw\_instanced extension. We chose this method because it seemed like the most intuitive and future-proof way of doing it.
+
+In practice this meant first generating a buffer in a separate setup stage:
+
+\begin{lstlisting}
+glGenBuffers(1, &model_matrix_buffer);
+\end{lstlisting}
+\noindent
+And then for every draw call we bind up the matrix buffer and communicate to OpenGL that the matrix will be in location 0, 1, 2 and 3 in the shader. This is because the size of a ``location'' in GLSL is the size of a vec4 and a mat4 consists of four of these:
+\begin{lstlisting}
+GLuint matrix_loc = 0;
+glBindBuffer(GL_ARRAY_BUFFER, model_matrix_buffer);
+for (int i = 0; i < 4; i++) {
+
+  glEnableVertexAttribArray(matrix_loc + i);
+  glVertexAttribPointer(matrix_loc + i,
+                        4, GL_FLOAT, GL_FALSE,
+                        sizeof(mat4),
+                        (void*)(sizeof(vec4) * i));
+  glVertexAttribDivisor(matrix_loc + i, 1);
+}
+\end{lstlisting}
+\noindent
+The result of this is that position 0 through three in the shader will be populated with the data uploaded to matrix\_loc.
+
+\begin{lstlisting}
+layout (location = 0) in mat4 model_matrix;
+\end{lstlisting}
+
+Now the most interesting part of the above for-loop is the call to glVertexAttribDivisor. This is the call which tells OpenGL that instead of updating this attribute for every vertex in the VAO it should be updated for every instance that is drawn. If one were to replace the second argument with another number $n$ it would be updated every $n$:th instance.
+
+And so the only remaining issue is actually providing the data to be consumed by the shader. In the basic case we're showcasing here the instances are drawn in a cube with $count$ instances per side.
+
+\begin{lstlisting}
+mat4 model_matrixes[count * count * count];
+for (int x = 0; x < count; x++) {
+  for (int y = 0; y < count; y++) {
+    for (int z = 0; z < count; z++) {
+      int pos = x + y * count + z * count * count;
+      model_matrixes[pos] = Mult(Mult(T(x * 2, y * 2, z * 2),
+          transEverything), Rx(time));
+      model_matrixes[pos] = Transpose(model_matrixes[pos]);
+    }
+  }
+}
+glBufferData(GL_ARRAY_BUFFER, sizeof(model_matrixes),
+    &model_matrixes, GL_STATIC_DRAW);
+\end{lstlisting}
+\noindent
+And with that done we're ready to make the one and only draw call:
+
+\begin{lstlisting}
+glDrawElementsInstanced(GL_TRIANGLES, m->numIndices,
+    GL_UNSIGNED_INT, 0L, count * count * count);
+\end{lstlisting}
+\noindent
+The result of which is a cube with $count * count * count$ objects in it.
+
+\section{Problems}
+
+The problems we encountered were mostly due to the design of OpenGL and how every draw call causes at least a dozen different side effects. After working around these the actual implementation of geometry instancing took less than a day.
+
+\section{Conclusions}
+
+The results of our project are a bit underwhelming to say the least. Although we managed to fulfill all the required conditions set up for the project we did nothing above and beyond that. Even though the implementation was simple in itself it took a lot of background knowledge about the graphics API in order to accomplish anything.
+
+We feel that we've learnt some, but that a lot of time was wasted on minute issues which could have been resolved had we had the experience we have now. Then of course that's true for everything in life.
+
+\end{document}
