@@ -12,8 +12,8 @@ add_subdirectory (libraries)
 add_executable ( Projekt
 	main.c
 	instancing.c
-	shaders/world.vert
-	shaders/world.frag
+	shaders/instancing.vert
+	shaders/instancing.frag
 	shaders/skybox.vert
 	shaders/skybox.frag
 )

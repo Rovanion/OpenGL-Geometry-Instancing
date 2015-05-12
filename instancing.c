@@ -54,9 +54,7 @@ void drawModelInstanced(Model *m, GLuint program, GLuint count, GLfloat time, ma
 			}
 		}
 	}
-
 	glBufferData(GL_ARRAY_BUFFER, sizeof(model_matrixes), &model_matrixes, GL_STATIC_DRAW);
-
 
 	glBindBuffer(GL_ARRAY_BUFFER, test_buffer);
 	glVertexAttribPointer(test_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -68,18 +66,16 @@ void drawModelInstanced(Model *m, GLuint program, GLuint count, GLfloat time, ma
 	glVertexAttribPointer(position_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(position_loc);
 
-
 	glBindBuffer(GL_ARRAY_BUFFER, m->nb);
 	glVertexAttribPointer(normal_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(normal_loc);
 
-
-	// VBO for texture coordinate data NEW for 5b
 	if (m->texCoordArray != NULL) {
 		glBindBuffer(GL_ARRAY_BUFFER, m->tb);
 		glVertexAttribPointer(texture_loc, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(texture_loc);
 	}
+
 	glDrawElementsInstanced(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L, count * count * count);
 
 }

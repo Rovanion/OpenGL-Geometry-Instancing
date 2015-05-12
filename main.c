@@ -22,40 +22,23 @@ GLuint program;
 GLuint skyboxProgram;
 GLuint instancingProgram;
 
-Model *walls;
-Model *roof;
-Model *blade;
-Model *balcony;
-Model *ground;
 Model *bunny;
 Model *octagon;
-Model *teapot;
 Model *skybox;
-mat4 transWalls;
-mat4 transRoof;
-mat4 transBlade;
-mat4 transBalcony;
-mat4 transGround;
 mat4 transBunny;
-mat4 transTeapot;
 mat4 transCubes;
 
-GLuint concrete;
-GLuint grass;
 GLuint skyTexture;
-GLuint maskrosTexture;
 
 mat4 lookMatrix;
 vec3 cameraPos;
 vec3 cameraTarget;
 vec3 cameraNormal;
 vec3 cameraDirection;
-vec3 bladePos;
 
 
 void init(void)
 {
-  bladePos = (vec3){0, 9, 4.5};
   cameraPos = (vec3){1.5f, 1.6f, 2.0f};
   cameraTarget = (vec3){-10.0f, -10.0f, -10.0f};
   cameraNormal = (vec3){0.0f, 1.0f, 0.0f};
@@ -63,32 +46,17 @@ void init(void)
 
 	dumpInfo();
 
-	walls = LoadModelPlus("./models/windmill/windmill-walls.obj");
-	roof = LoadModelPlus("./models/windmill/windmill-roof.obj");
-	blade = LoadModelPlus("./models/windmill/blade.obj");
-	balcony = LoadModelPlus("./models/windmill/windmill-balcony.obj");
-	ground = LoadModelPlus("./models/ground.obj");
 	bunny = LoadModelPlus("./models/bunnyplus.obj");
 	octagon = LoadModelPlus("./models/octagon.obj");
-	teapot = LoadModelPlus("./models/teapot.obj");
 	skybox = LoadModelPlus("./models/skybox.obj");
-	transWalls = T(0, 0, 0);
-	transRoof = Mult(transWalls, T(0, 0, 0));
-	transBalcony = Mult(transWalls, Ry(M_PI / 2));
-	transGround = Mult(T(-5.3,1.8,-1.5), Rz(M_PI/2));
-	transBunny = T(-2.2, -2.3, 10.2);
-	transTeapot = T(34.4, 6.4, -30.4);
+
+	transBunny = T(34.4, 6.4, -30.4);
 	transCubes = T(-2.2, -2.3, 10.2);
 
-	// Load textures
-	LoadTGATextureSimple("./textures/white.tga", &concrete);
-	LoadTGATextureSimple("./textures/green.tga", &grass);
 	LoadTGATextureSimple("./textures/SkyBox512.tga", &skyTexture);
-	LoadTGATextureSimple("./textures/darkblue.tga", &maskrosTexture);
 
-	// GL inits
 	printError("GL inits");
-	glClearColor(1.0,0.0,0.0,0);
+	glClearColor(1.0, 1.0, 1.0, 0);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -96,7 +64,6 @@ void init(void)
 
 	// Load and compile shader
 	skyboxProgram = loadShaders("./shaders/skybox.vert", "./shaders/skybox.frag");
-	program = loadShaders("./shaders/world.vert", "./shaders/world.frag");
 	instancingProgram = loadShaders("./shaders/instancing.vert", "./shaders/instancing.frag");
 
 	GLfloat projectionMatrix[] = {2.0f*near/(right-left), 0.0f,
@@ -107,35 +74,6 @@ void init(void)
                                 -2*far*near/(far - near),
                                 0.0f, 0.0f, -1.0f, 0.0f };
 
-	glUseProgram(program);
-	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, maskrosTexture);
-	glUniform1i(glGetUniformLocation(program, "maskrosen"), 1);
-	printError("init(): Multitexturing");
-	glActiveTexture(GL_TEXTURE0);
-
-  Point3D lightSourcesColorsArr[] = { {1.0f, 0.0f, 0.0f},   // Red light
-                                      {0.0f, 1.0f, 0.0f},   // Green light
-                                      {0.0f, 0.0f, 1.0f},   // Blue light
-                                      {1.0f, 1.0f, 1.0f} }; // White light
-	printError("init(): After lightSourcescolorsarr");
-	GLfloat specularExponent[] = {10.0, 20.0, 60.0, 5.0};
-	GLint isDirectional[] = {0,0,1,1};
-	Point3D lightSourcesDirectionsPositions[] = { {10.0f, 5.0f, 0.0f}, // Red light, positional
-																								{0.0f, 5.0f, 10.0f}, // Green light, positional
-																								{-1.0f, 0.0f, 0.0f}, // Blue light along X
-																								{0.0f, 0.0f, -1.0f} }; // White light along Z
-	glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
-							 4, &lightSourcesDirectionsPositions[0].x);
-	glUniform3fv(glGetUniformLocation(program, "lightSourcesColorArr"),
-							 4, &lightSourcesColorsArr[0].x);
-	glUniform1fv(glGetUniformLocation(program, "specularExponent"),
-							 4, specularExponent);
-	glUniform1iv(glGetUniformLocation(program, "isDirectional"),
-							 4, isDirectional);
-	glUniform1i(glGetUniformLocation(program, "texUnit"), 0);
-
 	glUseProgram(skyboxProgram);
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(skyboxProgram, "texUnit"), 0);
@@ -143,6 +81,7 @@ void init(void)
 
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUniform1i(glGetUniformLocation(instancingProgram, "texUnit"), 0);
 	setupInstancedVertexAttributes(instancingProgram, bunny);
 	printError("init(): End");
 }
@@ -154,52 +93,30 @@ void OnTimer(int value)
 	printError("OnTimer()");
 }
 
-void display(void)
-{
+void display(void) {
 	printError("pre display");
 	cameraPos = moveOnKeyInputRelativeCamera(cameraPos);
 	cameraTarget = moveOnKeyInputRelativeCamera(cameraTarget);
 	lookMatrix = lookAtv(cameraPos, cameraTarget, cameraNormal);
 
 	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME) / 5000;
-	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(skyboxProgram);
 	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "lookMatrix"), 1, GL_TRUE, lookMatrix.m);
 	glBindTexture(GL_TEXTURE_2D, skyTexture);
 	glDisable(GL_DEPTH_TEST);
-
 	glDisable(GL_CULL_FACE);
 	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "transform"), 1, GL_TRUE, T(cameraPos.x, cameraPos.y, cameraPos.z).m);
 	DrawModel(skybox, skyboxProgram, "in_Position", NULL, "in_TexCoord");
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	glUseProgram(program);
-	glUniformMatrix4fv(glGetUniformLocation(program, "lookMatrix"), 1, GL_TRUE, lookMatrix.m);
-	glUniform3fv(glGetUniformLocation(program, "cameraPos"), 1, &cameraPos);
-	transBlade = T(bladePos.x, bladePos.y, bladePos.z);
-	for (int i = 0; i < 4; i++){
-		mat4 rotBlade = Mult(Rz(M_PI / 2 * i + t), Ry(M_PI / 2));
-		mat4 transform = Mult(transBlade, rotBlade);
-		drawObject(transform, blade, program);
-	}
-
-	glBindTexture(GL_TEXTURE_2D, concrete);
-	//drawObject(transWalls, walls, program);
-	drawObject(transRoof, roof, program);
-	drawObject(transBalcony, balcony, program);
-
-	glBindTexture(GL_TEXTURE_2D, grass);
-	//drawObject(transGround,ground, program);
-	drawObject(transTeapot,balcony, program);
-
-
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "viewMatrix"), 1, GL_TRUE, lookMatrix.m);
+
 	drawModelInstanced(octagon, instancingProgram, 10, t, transCubes);
-	drawModelInstanced(octagon, instancingProgram, 10, t, transTeapot);
+	drawModelInstanced(bunny, instancingProgram, 10, t, transBunny);
 	glutSwapBuffers();
 }
 
