@@ -12,6 +12,8 @@ uniform sampler2D texUnit;
 out vec4 outColor;
 
 void main(void){
-	outColor = vertex.test;
-	//	outColor = texture(texUnit, vertex.textureCoordinates);
+	if(vertex.textureCoordinates == vec2(0.0, 0.0))
+		outColor = vertex.test;
+	else
+		outColor = texture(texUnit, vertex.textureCoordinates);
 }
