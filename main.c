@@ -38,6 +38,7 @@ mat4 transBalcony;
 mat4 transGround;
 mat4 transBunny;
 mat4 transTeapot;
+mat4 transCubes;
 
 GLuint concrete;
 GLuint grass;
@@ -77,6 +78,7 @@ void init(void)
 	transGround = Mult(T(-5.3,1.8,-1.5), Rz(M_PI/2));
 	transBunny = T(-2.2, -2.3, 10.2);
 	transTeapot = T(34.4, 6.4, -30.4);
+	transCubes = T(-2.2, -2.3, 10.2);
 
 	// Load textures
 	LoadTGATextureSimple("./textures/white.tga", &concrete);
@@ -90,6 +92,7 @@ void init(void)
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
 
 	// Load and compile shader
 	skyboxProgram = loadShaders("./shaders/skybox.vert", "./shaders/skybox.frag");
@@ -167,12 +170,13 @@ void display(void)
 	glBindTexture(GL_TEXTURE_2D, skyTexture);
 	glDisable(GL_DEPTH_TEST);
 
+	glDisable(GL_CULL_FACE);
 	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "transform"), 1, GL_TRUE, T(cameraPos.x, cameraPos.y, cameraPos.z).m);
 	DrawModel(skybox, skyboxProgram, "in_Position", NULL, "in_TexCoord");
-
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glUseProgram(program);
 
+	glUseProgram(program);
 	glUniformMatrix4fv(glGetUniformLocation(program, "lookMatrix"), 1, GL_TRUE, lookMatrix.m);
 	glUniform3fv(glGetUniformLocation(program, "cameraPos"), 1, &cameraPos);
 	transBlade = T(bladePos.x, bladePos.y, bladePos.z);
@@ -194,7 +198,8 @@ void display(void)
 
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "viewMatrix"), 1, GL_TRUE, lookMatrix.m);
-	drawModelInstanced(octagon, instancingProgram, 10, t);
+	drawModelInstanced(octagon, instancingProgram, 10, t, transCubes);
+	drawModelInstanced(octagon, instancingProgram, 10, t, transTeapot);
 	glutSwapBuffers();
 }
 
@@ -235,8 +240,14 @@ vec3 moveOnKeyInputRelativeCamera(vec3 in)
 {
 	vec3 forward;
 	vec3 leftV;
-	forward = ScalarMult(cameraDirection, 0.1f);
-	leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 0.1f);
+	if(keyIsDown('x')){
+		forward = ScalarMult(cameraDirection, 1.0f);
+		leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 1.0f);
+	}
+	else{
+		forward = ScalarMult(cameraDirection, 0.1f);
+		leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 0.1f);
+	}
 
   if(keyIsDown('w')) {
     in.x += forward.x;

@@ -19,9 +19,12 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 // The output of the vertex shader (matched to thead// fragment shader)
-out vec3 vertNormal;
-out	vec2 vertTextureCoordinates;
-out	vec4 vertTest;
+out VERTEX
+{
+	vec3 normal;
+	vec2 textureCoordinates;
+	vec4 test;
+} vertex;
 
 void main(void)
 {
@@ -31,12 +34,11 @@ void main(void)
 
 	// Transform position by the model-view matrix, then by thead
 	// projection matrix.
-	gl_Position = projectionMatrix * viewMatrix * position;
+	gl_Position = projectionMatrix * viewMatrix * model_matrix * position;
 	// Transform the normal by the upper-left-3x3-submatrix of thead    // model-view matrix
-	vertNormal =  normal;
-	vertTest = test;
+	vertex.normal =  normal;
 	// Pass the per-instance color through to the fragment shader.
-	vertTextureCoordinates = textureCoordinates;
+	vertex.textureCoordinates = textureCoordinates;
 
-
+	vertex.test = test;
 }
