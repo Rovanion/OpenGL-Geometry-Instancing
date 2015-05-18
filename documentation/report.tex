@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{listings}
+\usepackage{hyperref}
 \lstset{
 language=C,
 basicstyle=\footnotesize
@@ -54,7 +55,7 @@ There are multiple ways of storing these transformation matrixes for transfer an
 
 \section{Implementation}
 
-We decided on implementing geometry instancing using instanced arrays and the OpenGL glDraw*Instaced calls which require either OpenGL version 3.3 or an earlier version which implements the GL\_ARB\_draw\_instanced extension. We chose this method because it seemed like the most intuitive and future-proof way of doing it.
+We decided on implementing geometry instancing using instanced arrays and the OpenGL glDraw*Instaced calls which require either OpenGL version 3.3 or an earlier version which implements the GL\_ARB\_draw\_instanced extension. We chose this method because it seemed like the most intuitive and future-proof way of doing instancing while remaining performant \footnote{\href{http://sol.gfxile.net/instancing.html}{Performance comparison of geometry instancing techniques.}}.
 
 In practice this meant first generating a buffer in a separate setup stage:
 
