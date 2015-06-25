@@ -10,7 +10,7 @@
 #include "instancing.h"
 
 #define near 1.0
-#define far 300.0
+#define far 1000.0
 #define right 0.5
 #define left -0.5
 #define top 0.5
@@ -27,8 +27,12 @@ Model *octagon;
 Model *skybox;
 mat4 transBunny;
 mat4 transCubes;
+mat4 transCubes1;
+mat4 transCubes2;
 
 GLuint skyTexture;
+
+GLfloat lastT = 0;
 
 mat4 lookMatrix;
 vec3 cameraPos;
@@ -36,11 +40,12 @@ vec3 cameraTarget;
 vec3 cameraNormal;
 vec3 cameraDirection;
 
+int nrInstances = 20000;
 
 void init(void)
 {
-  cameraPos = (vec3){1.5f, 1.6f, 2.0f};
-  cameraTarget = (vec3){-10.0f, -10.0f, -10.0f};
+  cameraPos = (vec3){1.5f, -20.0f, -10.0f};
+  cameraTarget = (vec3){10.0f, 50.0f, 0.0f};
   cameraNormal = (vec3){0.0f, 1.0f, 0.0f};
   lookMatrix = lookAtv(cameraPos, cameraTarget, cameraNormal);
 
@@ -52,6 +57,8 @@ void init(void)
 
 	transBunny = T(34.4, 6.4, -30.4);
 	transCubes = T(-2.2, -2.3, 10.2);
+	transCubes1 = T(88, -2.3, 10.2);
+	transCubes2 = T(-88, -2.3, 10.2);
 
 	LoadTGATextureSimple("./textures/SkyBox512.tga", &skyTexture);
 
@@ -82,7 +89,7 @@ void init(void)
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUniform1i(glGetUniformLocation(instancingProgram, "texUnit"), 0);
-	setupInstancedVertexAttributes(instancingProgram, bunny);
+	setupInstancedVertexAttributes(instancingProgram, nrInstances);
 	printError("init(): End");
 }
 
@@ -99,7 +106,7 @@ void display(void) {
 	cameraTarget = moveOnKeyInputRelativeCamera(cameraTarget);
 	lookMatrix = lookAtv(cameraPos, cameraTarget, cameraNormal);
 
-	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME) / 5000;
+	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME) / 1000;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(skyboxProgram);
@@ -115,8 +122,10 @@ void display(void) {
 	glUseProgram(instancingProgram);
 	glUniformMatrix4fv(glGetUniformLocation(instancingProgram, "viewMatrix"), 1, GL_TRUE, lookMatrix.m);
 
-	drawModelInstanced(octagon, instancingProgram, 30, t, transCubes);
+	drawModelInstanced(octagon, instancingProgram, nrInstances, t, transCubes);
 	drawModelInstanced(bunny, instancingProgram, 10, t, transBunny);
+	printf("%f\n", t - lastT);
+	lastT = t;
 	glutSwapBuffers();
 }
 
@@ -158,12 +167,12 @@ vec3 moveOnKeyInputRelativeCamera(vec3 in)
 	vec3 forward;
 	vec3 leftV;
 	if(keyIsDown('x')){
-		forward = ScalarMult(cameraDirection, 1.0f);
-		leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 1.0f);
+		forward = ScalarMult(cameraDirection, 10.0f);
+		leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 10.0f);
 	}
 	else{
-		forward = ScalarMult(cameraDirection, 0.1f);
-		leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 0.1f);
+		forward = ScalarMult(cameraDirection, 1.0f);
+		leftV = ScalarMult(CrossProduct(cameraDirection, cameraNormal), 1.0f);
 	}
 
   if(keyIsDown('w')) {

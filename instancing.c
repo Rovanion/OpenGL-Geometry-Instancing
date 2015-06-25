@@ -1,3 +1,5 @@
+#include <time.h>
+#include <stdlib.h>
 #include <math.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
@@ -18,10 +20,19 @@ GLuint texture_loc  = 2;
 GLuint test_loc     = 3;
 GLuint matrix_loc   = 4;
 
-void setupInstancedVertexAttributes(GLuint prog){
+float* randoms;
+
+void setupInstancedVertexAttributes(GLuint prog, int count){
 	glUseProgram(prog);
 	glGenBuffers(1, &model_matrix_buffer);
 	glGenBuffers(1, &test_buffer);
+	srand(time(NULL));
+	randoms = malloc(count * sizeof(float));
+	for (int i = 0; i < count; i++) {
+		randoms[i] = (float)rand() / (float)(RAND_MAX / 10.0);
+		printf("%f\n", randoms[i]);
+	}
+
 }
 
 void drawModelInstanced(Model *m, GLuint program, GLuint count, GLfloat time, mat4 transEverything) {
@@ -42,17 +53,16 @@ void drawModelInstanced(Model *m, GLuint program, GLuint count, GLfloat time, ma
 													(void*)(sizeof(vec4) * i)); // Start offset
 		glVertexAttribDivisor(matrix_loc + i, 1);
 	}
-	mat4 model_matrixes[count * count * count];
-	vec3 test_data[count * count * count];
-	for (int x = 0; x < count; x++) {
-		for (int y = 0; y < count; y++) {
-			for (int z = 0; z < count; z++) {
-				int pos = x + y * count + z * count * count;
-				model_matrixes[pos] = Mult(Mult(T(x * 2, y * 2, z * 2), transEverything), Rx(time * (pos % count + 1)));
-				model_matrixes[pos] = Transpose(model_matrixes[pos]);
-				test_data[pos] = (vec3) { (float)x / (float)count, (float)y / (float)count, (float)z / (float)count };
-			}
-		}
+	mat4 model_matrixes[count];
+	vec3 test_data[count];
+	for (int pos = 0; pos < count; pos++) {
+		model_matrixes[pos] = Mult(Mult(Mult(transEverything,
+																				 Ry(time + (float)pos / randoms[pos])),
+																		T((float)pos / 300 + randoms[pos] * (float)pos / 3000, (float)pos / 75, 1)),
+															 Rz(time * (pos % 12) + randoms[pos]));
+		model_matrixes[pos] = Transpose(model_matrixes[pos]);
+		test_data[pos] = (vec3) { (float)pos / (float)count, (float)pos / (float)count, (float)pos / (float)count };
+
 	}
 	glBufferData(GL_ARRAY_BUFFER, sizeof(model_matrixes), &model_matrixes, GL_STATIC_DRAW);
 
@@ -76,5 +86,5 @@ void drawModelInstanced(Model *m, GLuint program, GLuint count, GLfloat time, ma
 		glEnableVertexAttribArray(texture_loc);
 	}
 
-	glDrawElementsInstanced(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L, count * count * count);
+	glDrawElementsInstanced(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L, count);
 }
