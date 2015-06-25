@@ -18,7 +18,7 @@ GLuint texture_loc  = 2;
 GLuint test_loc     = 3;
 GLuint matrix_loc   = 4;
 
-void setupInstancedVertexAttributes(GLuint prog, Model* m){
+void setupInstancedVertexAttributes(GLuint prog){
 	glUseProgram(prog);
 	glGenBuffers(1, &model_matrix_buffer);
 	glGenBuffers(1, &test_buffer);
@@ -34,7 +34,6 @@ void drawModelInstanced(Model *m, GLuint program, GLuint count, GLfloat time, ma
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, model_matrix_buffer);
 
-	mat4 model_matrixes[count * count * count];
 	for (int i = 0; i < 4; i++) {
 		glEnableVertexAttribArray(matrix_loc + i);
 		glVertexAttribPointer(matrix_loc + i,            // Location
@@ -43,12 +42,13 @@ void drawModelInstanced(Model *m, GLuint program, GLuint count, GLfloat time, ma
 													(void*)(sizeof(vec4) * i)); // Start offset
 		glVertexAttribDivisor(matrix_loc + i, 1);
 	}
+	mat4 model_matrixes[count * count * count];
 	vec3 test_data[count * count * count];
 	for (int x = 0; x < count; x++) {
 		for (int y = 0; y < count; y++) {
 			for (int z = 0; z < count; z++) {
 				int pos = x + y * count + z * count * count;
-				model_matrixes[pos] = Mult(Mult(T(x * 2, y * 2, z * 2), transEverything), Rx(time));
+				model_matrixes[pos] = Mult(Mult(T(x * 2, y * 2, z * 2), transEverything), Rx(time * (pos % count + 1)));
 				model_matrixes[pos] = Transpose(model_matrixes[pos]);
 				test_data[pos] = (vec3) { (float)x / (float)count, (float)y / (float)count, (float)z / (float)count };
 			}
@@ -77,5 +77,4 @@ void drawModelInstanced(Model *m, GLuint program, GLuint count, GLfloat time, ma
 	}
 
 	glDrawElementsInstanced(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L, count * count * count);
-
 }
