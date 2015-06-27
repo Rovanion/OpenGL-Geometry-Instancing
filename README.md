@@ -27,8 +27,8 @@ Installation
 The following instructions will set up and run the project:
 
 ```
-git clone git@github.com:Rovanion/TSBK07-Projekt.git
-cd TSBK07-Projekt/build
+git clone git@github.com:Rovanion/OpenGL-Geometry-Instancing.git
+cd OpenGL-Geometry-Instancing/build
 cmake ..
 make
 ./Project
