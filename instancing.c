@@ -29,7 +29,7 @@ void setupInstancedVertexAttributes(GLuint prog, int count){
 	srand(time(NULL));
 	randoms = malloc(count * sizeof(float));
 	for (int i = 0; i < count; i++) {
-		randoms[i] = (float)rand() / (float)(RAND_MAX / 10.0);
+		randoms[i] = (float)rand() / (float)(RAND_MAX / 20.0) + 0.1;
 		printf("%f\n", randoms[i]);
 	}
 
