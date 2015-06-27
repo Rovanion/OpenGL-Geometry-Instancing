@@ -151,10 +151,12 @@ int main(int argc, char *argv[])
 
 void handleMouse(int x, int y)
 {
+	int width = glutGet(GLUT_WINDOW_WIDTH);
+	int height = glutGet(GLUT_WINDOW_HEIGHT);
   cameraTarget = (vec3)
-		{cos((float)x / 400 * M_PI * 2) * sin((float)y / 300 * M_PI),
-		 -(float)y / 300 + 0.5,
-		 sin((float)x / 400 * M_PI * 2) * sin((float)y / 300 * M_PI)};
+		{cos((float)x / width * M_PI * 2) * sin((float)y / height * M_PI),
+		 -(float)y / height + 0.5,
+		 sin((float)x / width * M_PI * 2) * sin((float)y / height * M_PI)};
 	cameraTarget = VectorAdd(cameraTarget, cameraPos);
 
 	lookMatrix = lookAtv(cameraPos, cameraTarget, cameraNormal);
